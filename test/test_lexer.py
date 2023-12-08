@@ -10,6 +10,7 @@ from mako.lexer import Lexer
 from mako.template import Template
 from test import assert_raises_message
 from test import eq_
+from test import assert_raises
 from test import TemplateTest
 from test.util import flatten_result
 
@@ -438,8 +439,39 @@ class LexerTest(TemplateTest):
             ),
         )
 
-    @pytest.mark.parametrize("comma,numchars", [(",", 48), ("", 47)])
-    def test_pagetag(self, comma, numchars):
+    def test_pagetag_1(self, comma=",", numchars=48):
+        # note that the comma here looks like:
+        # <%page cached="True", args="a, b"/>
+        # that's what this test has looked like for decades, however, the
+        # comma there is not actually the right syntax.  When issue #366
+        # was fixed, the reg was altered to accommodate for this comma to allow
+        # backwards compat
+        template = f"""
+            <%page cached="True"{comma} args="a, b"/>
+
+            some template
+        """
+        nodes = Lexer(template).parse()
+        self._compare(
+            nodes,
+            TemplateNode(
+                {},
+                [
+                    Text("\n            ", (1, 1)),
+                    PageTag(
+                        "page", {"args": "a, b", "cached": "True"}, (2, 13), []
+                    ),
+                    Text(
+                        """
+
+            some template
+        """,
+                        (2, numchars),
+                    ),
+                ],
+            ),
+        )
+    def test_pagetag_2(self, comma="", numchars=47):
         # note that the comma here looks like:
         # <%page cached="True", args="a, b"/>
         # that's what this test has looked like for decades, however, the
@@ -1304,3 +1336,4 @@ hi
                 ],
             ),
         )
+
