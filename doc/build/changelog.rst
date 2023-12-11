@@ -7,6 +7,21 @@ Changelog
 ===
 
 .. changelog::
+    :version: 1.1.6.1
+    :released: Mon Dec 11 2023
+
+.. change::
+    :tags: bug, lexer
+    :tickets: 366
+
+    Fixed issue in lexer where the regexp used to match tags would not
+    correctly interpret quoted sections individually. While this parsing issue
+    still produced the same expected tag structure later on, the mis-handling
+    of quoted sections was also subject to a regexp crash if a tag had a large
+    number of quotes within its quoted sections.
+
+
+.. changelog::
     :version: 1.1.6
     :released: Wed Nov 17 2021
 
